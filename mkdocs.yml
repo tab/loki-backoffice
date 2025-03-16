@@ -1,0 +1,29 @@
+site_name: Loki backoffice
+site_url: https://tab.github.io/loki-backoffice
+site_author: tab
+site_description: SSO service for authentication via Smart-ID and Mobile-ID
+
+repo_name: tab/loki-backoffice
+repo_url: https://github.com/tab/loki-backoffice
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: indigo
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true

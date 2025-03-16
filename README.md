@@ -13,7 +13,7 @@ Loki-backoffice backend application
 Before starting this application, you must have the loki-infrastructure running:
 
 ```sh
-git clone git@github.com:yourusername/loki-infrastructure.git
+git clone git@github.com/tab/loki-infrastructure.git
 cd loki-infrastructure
 ```
 
