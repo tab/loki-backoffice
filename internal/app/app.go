@@ -9,20 +9,24 @@ import (
 
 	"loki-backoffice/internal/app/controllers"
 	"loki-backoffice/internal/app/repositories"
+	"loki-backoffice/internal/app/rpcs"
 	"loki-backoffice/internal/app/services"
 	"loki-backoffice/internal/config"
 	"loki-backoffice/internal/config/middlewares"
 	"loki-backoffice/internal/config/router"
 	"loki-backoffice/internal/config/server"
 	"loki-backoffice/internal/config/telemetry"
+	"loki-backoffice/pkg/jwt"
 	"loki-backoffice/pkg/logger"
 )
 
 var Module = fx.Options(
 	logger.Module,
+	jwt.Module,
 
 	controllers.Module,
 	repositories.Module,
+	rpcs.Module,
 	services.Module,
 
 	middlewares.Module,
@@ -32,6 +36,7 @@ var Module = fx.Options(
 	telemetry.Module,
 
 	fx.Invoke(registerHooks),
+	fx.Invoke(registerGrpcClient),
 	fx.Invoke(registerTelemetry),
 )
 
@@ -60,6 +65,19 @@ func registerHooks(
 			defer cancel()
 
 			return server.Shutdown(shutdownCtx)
+		},
+	})
+}
+
+func registerGrpcClient(
+	lifecycle fx.Lifecycle,
+	client rpcs.Client,
+	log *logger.Logger,
+) {
+	lifecycle.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			log.Info().Msg("Closing gRPC client connection...")
+			return client.Close()
 		},
 	})
 }

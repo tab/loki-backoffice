@@ -15,6 +15,12 @@
 cmd/loki/main
 cmd/loki/loki
 
+# Certificates
+certs/*.pem
+certs/*.crt
+certs/*.key
+certs/*.csr
+
 # Dependency directories (remove the comment below to include it)
 vendor/
 

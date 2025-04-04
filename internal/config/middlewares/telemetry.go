@@ -35,13 +35,17 @@ func (m *telemetryMiddleware) Trace(next http.Handler) http.Handler {
 			r.Header.Set(AuthenticationTraceKey, traceId)
 		}
 
+		ctx := NewContextModifier(r.Context()).
+			WithTraceId(traceId).
+			Context()
+
 		id, _ := trace.TraceIDFromHex(formatToTraceID(traceId))
 		spanCtx := trace.NewSpanContext(trace.SpanContextConfig{
 			TraceID: id,
 			Remote:  true,
 		})
 
-		ctx := trace.ContextWithSpanContext(r.Context(), spanCtx)
+		ctx = trace.ContextWithSpanContext(ctx, spanCtx)
 		ctx, span := tracer.Start(ctx, formatToOperationName(r.URL.Path))
 		defer span.End()
 

@@ -22,9 +22,27 @@ func Test_HealthCheck(t *testing.T) {
 		AppAddr: "localhost:8080",
 	}
 
+	mockAuthenticationMiddleware := middlewares.NewMockAuthenticationMiddleware(ctrl)
+	mockAuthorizationMiddleware := middlewares.NewMockAuthorizationMiddleware(ctrl)
 	mockTelemetryMiddleware := middlewares.NewMockTelemetryMiddleware(ctrl)
-	mockHealthController := controllers.NewMockHealthController(ctrl)
 
+	mockHealthController := controllers.NewMockHealthController(ctrl)
+	mockPermissionsController := controllers.NewMockPermissionsController(ctrl)
+
+	mockAuthenticationMiddleware.EXPECT().
+		Authenticate(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(next http.Handler) http.Handler {
+			return next
+		})
+	mockAuthorizationMiddleware.EXPECT().
+		Check(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(permission string) func(http.Handler) http.Handler {
+			return func(next http.Handler) http.Handler {
+				return next
+			}
+		})
 	mockTelemetryMiddleware.EXPECT().
 		Trace(gomock.Any()).
 		AnyTimes().
@@ -32,7 +50,14 @@ func Test_HealthCheck(t *testing.T) {
 			return next
 		})
 
-	router := NewRouter(cfg, mockTelemetryMiddleware, mockHealthController)
+	router := NewRouter(
+		cfg,
+		mockAuthenticationMiddleware,
+		mockAuthorizationMiddleware,
+		mockTelemetryMiddleware,
+		mockHealthController,
+		mockPermissionsController,
+	)
 
 	req := httptest.NewRequest(http.MethodHead, "/health", nil)
 	w := httptest.NewRecorder()
