@@ -10,16 +10,24 @@ import (
 	"loki-backoffice/internal/app/controllers"
 	"loki-backoffice/internal/config"
 	"loki-backoffice/internal/config/middlewares"
+	"loki-backoffice/pkg/rbac"
 )
 
 func NewRouter(
 	cfg *config.Config,
+
+	authentication middlewares.AuthenticationMiddleware,
+	authorization middlewares.AuthorizationMiddleware,
 	telemetry middlewares.TelemetryMiddleware,
+
 	health controllers.HealthController,
+
+	permissions controllers.PermissionsController,
 ) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(telemetry.Trace)
+	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Compress(5))
 	r.Use(middleware.Heartbeat("/health"))
@@ -27,13 +35,24 @@ func NewRouter(
 		cors.Handler(cors.Options{
 			AllowedOrigins: []string{"http://*", cfg.ClientURL},
 			AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-			AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-Trace-ID"},
+			AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"},
 			MaxAge:         300,
 		}),
 	)
 
 	r.Get("/live", health.HandleLiveness)
 	r.Get("/ready", health.HandleReadiness)
+
+	r.Group(func(r chi.Router) {
+		r.Use(authentication.Authenticate)
+		r.Route("/api/backoffice", func(r chi.Router) {
+			r.With(authorization.Check(rbac.ReadPermissions)).Get("/permissions", permissions.List)
+			r.With(authorization.Check(rbac.ReadPermissions)).Get("/permissions/{id}", permissions.Get)
+			r.With(authorization.Check(rbac.WritePermissions)).Post("/permissions", permissions.Create)
+			r.With(authorization.Check(rbac.WritePermissions)).Put("/permissions/{id}", permissions.Update)
+			r.With(authorization.Check(rbac.WritePermissions)).Delete("/permissions/{id}", permissions.Delete)
+		})
+	})
 
 	return r
 }

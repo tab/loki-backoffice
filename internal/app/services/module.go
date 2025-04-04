@@ -1,7 +1,18 @@
 package services
 
-import "go.uber.org/fx"
+import (
+	"go.uber.org/fx"
+
+	"loki-backoffice/internal/app/rpcs"
+	proto "loki-backoffice/internal/app/rpcs/proto/sso/v1"
+)
 
 var Module = fx.Options(
 	fx.Provide(NewHealthChecker),
+	fx.Provide(
+		func(registry *rpcs.Registry) proto.PermissionServiceClient {
+			return registry.GetPermissionClient()
+		},
+		NewPermissions,
+	),
 )
