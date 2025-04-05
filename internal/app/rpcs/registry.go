@@ -6,18 +6,24 @@ import (
 
 type Registry struct {
 	permissionClient proto.PermissionServiceClient
+	roleClient       proto.RoleServiceClient
 	scopeClient      proto.ScopeServiceClient
 }
 
 func NewRegistry(client Client) *Registry {
 	return &Registry{
 		permissionClient: proto.NewPermissionServiceClient(client.Connection()),
+		roleClient:       proto.NewRoleServiceClient(client.Connection()),
 		scopeClient:      proto.NewScopeServiceClient(client.Connection()),
 	}
 }
 
 func (r *Registry) GetPermissionClient() proto.PermissionServiceClient {
 	return r.permissionClient
+}
+
+func (r *Registry) GetRoleClient() proto.RoleServiceClient {
+	return r.roleClient
 }
 
 func (r *Registry) GetScopeClient() proto.ScopeServiceClient {

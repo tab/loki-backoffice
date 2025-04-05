@@ -28,6 +28,7 @@ func Test_HealthCheck(t *testing.T) {
 
 	mockHealthController := controllers.NewMockHealthController(ctrl)
 	mockPermissionsController := controllers.NewMockPermissionsController(ctrl)
+	mockRolesController := controllers.NewMockRolesController(ctrl)
 	mockScopesController := controllers.NewMockScopesController(ctrl)
 
 	mockAuthenticationMiddleware.EXPECT().
@@ -58,6 +59,7 @@ func Test_HealthCheck(t *testing.T) {
 		mockTelemetryMiddleware,
 		mockHealthController,
 		mockPermissionsController,
+		mockRolesController,
 		mockScopesController,
 	)
 
