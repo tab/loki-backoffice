@@ -15,6 +15,18 @@ var (
 	// ErrEmptyDescription indicates that the description is empty or invalid
 	ErrEmptyDescription = errors.New("empty description")
 
+	// ErrEmptyIdentityNumber indicates that the identity number is empty or invalid
+	ErrEmptyIdentityNumber = errors.New("empty identity number")
+
+	// ErrEmptyPersonalCode indicates that the personal code is empty or invalid
+	ErrEmptyPersonalCode = errors.New("empty personal code")
+
+	// ErrEmptyFirstName indicates that the first name is empty or invalid
+	ErrEmptyFirstName = errors.New("empty first name")
+
+	// ErrEmptyLastName indicates that the last name is empty or invalid
+	ErrEmptyLastName = errors.New("empty last name")
+
 	// ErrInvalidArguments indicates that the provided request arguments are invalid
 	ErrInvalidArguments = errors.New("invalid arguments")
 

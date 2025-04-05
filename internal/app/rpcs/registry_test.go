@@ -34,4 +34,7 @@ func Test_NewRegistry(t *testing.T) {
 
 	tokenClient := registry.GetTokenClient()
 	assert.NotNil(t, tokenClient)
+
+	userClient := registry.GetUserClient()
+	assert.NotNil(t, userClient)
 }

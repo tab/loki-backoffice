@@ -9,6 +9,7 @@ type Registry struct {
 	roleClient       proto.RoleServiceClient
 	scopeClient      proto.ScopeServiceClient
 	tokenClient      proto.TokenServiceClient
+	userClient       proto.UserServiceClient
 }
 
 func NewRegistry(client Client) *Registry {
@@ -17,6 +18,7 @@ func NewRegistry(client Client) *Registry {
 		roleClient:       proto.NewRoleServiceClient(client.Connection()),
 		scopeClient:      proto.NewScopeServiceClient(client.Connection()),
 		tokenClient:      proto.NewTokenServiceClient(client.Connection()),
+		userClient:       proto.NewUserServiceClient(client.Connection()),
 	}
 }
 
@@ -34,4 +36,8 @@ func (r *Registry) GetScopeClient() proto.ScopeServiceClient {
 
 func (r *Registry) GetTokenClient() proto.TokenServiceClient {
 	return r.tokenClient
+}
+
+func (r *Registry) GetUserClient() proto.UserServiceClient {
+	return r.userClient
 }

@@ -33,4 +33,10 @@ var Module = fx.Options(
 		},
 		NewTokens,
 	),
+	fx.Provide(
+		func(registry *rpcs.Registry) proto.UserServiceClient {
+			return registry.GetUserClient()
+		},
+		NewUsers,
+	),
 )
