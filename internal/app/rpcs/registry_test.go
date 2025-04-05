@@ -19,8 +19,12 @@ func Test_NewRegistry(t *testing.T) {
 	registry := NewRegistry(mockClient)
 
 	assert.NotNil(t, registry)
-	assert.NotNil(t, registry.client)
+	assert.NotNil(t, registry.permissionClient)
+	assert.NotNil(t, registry.scopeClient)
 
 	permissionClient := registry.GetPermissionClient()
 	assert.NotNil(t, permissionClient)
+
+	scopeClient := registry.GetScopeClient()
+	assert.NotNil(t, scopeClient)
 }

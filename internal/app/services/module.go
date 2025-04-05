@@ -15,4 +15,10 @@ var Module = fx.Options(
 		},
 		NewPermissions,
 	),
+	fx.Provide(
+		func(registry *rpcs.Registry) proto.ScopeServiceClient {
+			return registry.GetScopeClient()
+		},
+		NewScopes,
+	),
 )
