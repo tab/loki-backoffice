@@ -31,4 +31,7 @@ func Test_NewRegistry(t *testing.T) {
 
 	scopeClient := registry.GetScopeClient()
 	assert.NotNil(t, scopeClient)
+
+	tokenClient := registry.GetTokenClient()
+	assert.NotNil(t, tokenClient)
 }

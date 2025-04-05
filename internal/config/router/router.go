@@ -25,6 +25,7 @@ func NewRouter(
 	permissions controllers.PermissionsController,
 	roles controllers.RolesController,
 	scopes controllers.ScopesController,
+	tokens controllers.TokensController,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -65,6 +66,9 @@ func NewRouter(
 			r.With(authorization.Check(rbac.WriteScopes)).Post("/scopes", scopes.Create)
 			r.With(authorization.Check(rbac.WriteScopes)).Put("/scopes/{id}", scopes.Update)
 			r.With(authorization.Check(rbac.WriteScopes)).Delete("/scopes/{id}", scopes.Delete)
+
+			r.With(authorization.Check(rbac.ReadTokens)).Get("/tokens", tokens.List)
+			r.With(authorization.Check(rbac.WriteTokens)).Delete("/tokens/{id}", tokens.Delete)
 		})
 	})
 
