@@ -1,18 +1,46 @@
 package jwt
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"loki-backoffice/internal/app/errors"
+	"loki-backoffice/internal/config"
 )
 
+func Test_NewJWT(t *testing.T) {
+	tempDir := generateTestKeys(t)
+
+	cfg := &config.Config{
+		CertPath: tempDir,
+	}
+	service, err := NewJWT(cfg)
+	assert.NoError(t, err)
+	assert.NotNil(t, service)
+}
+
 func Test_JWT_Decode(t *testing.T) {
-	service := NewJWT()
+	tempDir := generateTestKeys(t)
+
+	cfg := &config.Config{
+		CertPath: tempDir,
+	}
+	service, err := NewJWT(cfg)
+	assert.NoError(t, err)
+
+	privateKey, err := loadPrivateKey(cfg)
+	assert.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -22,7 +50,7 @@ func Test_JWT_Decode(t *testing.T) {
 	}{
 		{
 			name:  "Success",
-			token: generateToken("PNOEE-30303039914", []string{"read:all"}, []string{"admin"}, []string{"scope:all"}),
+			token: generateToken("PNOEE-30303039914", []string{"read:all"}, []string{"admin"}, []string{"scope:all"}, privateKey),
 			expected: &Payload{
 				ID:          "PNOEE-30303039914",
 				Roles:       []string{"admin"},
@@ -32,7 +60,7 @@ func Test_JWT_Decode(t *testing.T) {
 		},
 		{
 			name:  "Success with empty payload",
-			token: generateToken("PNOEE-30303039914", nil, nil, nil),
+			token: generateToken("PNOEE-30303039914", nil, nil, nil, privateKey),
 			expected: &Payload{
 				ID: "PNOEE-30303039914",
 			},
@@ -132,7 +160,7 @@ func Test_JWT_Decode_Mocked(t *testing.T) {
 	}
 }
 
-func generateToken(id string, permissions, roles, scope []string) string {
+func generateToken(id string, permissions, roles, scope []string, privateKey *rsa.PrivateKey) string {
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        id,
@@ -142,7 +170,44 @@ func generateToken(id string, permissions, roles, scope []string) string {
 		Permissions: permissions,
 		Scope:       scope,
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, _ := token.SignedString([]byte("test-secret-key"))
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	signedToken, _ := token.SignedString(privateKey)
 	return signedToken
+}
+
+func generateTestKeys(t *testing.T) string {
+	tempDir, err := os.MkdirTemp("", "jwt-test-*")
+	require.NoError(t, err)
+
+	t.Cleanup(func() { os.RemoveAll(tempDir) })
+
+	jwtDir := filepath.Join(tempDir, Dir)
+	err = os.MkdirAll(jwtDir, 0755)
+	require.NoError(t, err)
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: privateKeyBytes,
+	})
+
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	require.NoError(t, err)
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+
+	err = os.WriteFile(filepath.Join(jwtDir, PrivateKeyFile), privateKeyPEM, 0600)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(jwtDir, PublicKeyFile), publicKeyPEM, 0644)
+	require.NoError(t, err)
+
+	return tempDir
 }
