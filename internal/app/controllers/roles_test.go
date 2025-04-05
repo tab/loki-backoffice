@@ -189,6 +189,8 @@ func Test_Roles_Get(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewRolesController(roles, log)
 
+	id := uuid.MustParse("10000000-1000-1000-1000-000000000001")
+
 	type result struct {
 		response serializers.RoleSerializer
 		error    serializers.ErrorSerializer
@@ -206,14 +208,14 @@ func Test_Roles_Get(t *testing.T) {
 			name: "Success",
 			before: func() {
 				roles.EXPECT().FindById(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(&models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}, nil)
 			},
 			expected: result{
 				response: serializers.RoleSerializer{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				},
@@ -225,7 +227,7 @@ func Test_Roles_Get(t *testing.T) {
 		{
 			name: "Not found",
 			before: func() {
-				roles.EXPECT().FindById(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(&models.Role{}, errors.ErrRecordNotFound)
+				roles.EXPECT().FindById(gomock.Any(), id).Return(&models.Role{}, errors.ErrRecordNotFound)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: errors.ErrRecordNotFound.Error()},
@@ -236,7 +238,7 @@ func Test_Roles_Get(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				roles.EXPECT().FindById(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(&models.Role{}, assert.AnError)
+				roles.EXPECT().FindById(gomock.Any(), id).Return(&models.Role{}, assert.AnError)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: assert.AnError.Error()},
@@ -287,6 +289,8 @@ func Test_Roles_Create(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewRolesController(roles, log)
 
+	id := uuid.MustParse("10000000-1000-1000-1000-000000000001")
+
 	type result struct {
 		response serializers.RoleSerializer
 		error    serializers.ErrorSerializer
@@ -308,7 +312,7 @@ func Test_Roles_Create(t *testing.T) {
 					Name:        "admin",
 					Description: "Admin role",
 				}).Return(&models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}, nil)
@@ -316,7 +320,7 @@ func Test_Roles_Create(t *testing.T) {
 			body: strings.NewReader(`{"name": "admin", "description" :"Admin role"}`),
 			expected: result{
 				response: serializers.RoleSerializer{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				},
@@ -427,6 +431,8 @@ func Test_Roles_Update(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewRolesController(roles, log)
 
+	id := uuid.MustParse("10000000-1000-1000-1000-000000000001")
+
 	type result struct {
 		response serializers.RoleSerializer
 		error    serializers.ErrorSerializer
@@ -445,11 +451,11 @@ func Test_Roles_Update(t *testing.T) {
 			name: "Success",
 			before: func() {
 				roles.EXPECT().Update(gomock.Any(), &models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}).Return(&models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}, nil)
@@ -457,7 +463,7 @@ func Test_Roles_Update(t *testing.T) {
 			body: strings.NewReader(`{"name": "admin", "description": "Admin role"}`),
 			expected: result{
 				response: serializers.RoleSerializer{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				},
@@ -483,7 +489,7 @@ func Test_Roles_Update(t *testing.T) {
 			name: "Invalid arguments",
 			before: func() {
 				roles.EXPECT().Update(gomock.Any(), &models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}).Return(&models.Role{}, errors.ErrInvalidArguments)
@@ -500,7 +506,7 @@ func Test_Roles_Update(t *testing.T) {
 			name: "Not found",
 			before: func() {
 				roles.EXPECT().Update(gomock.Any(), &models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}).Return(&models.Role{}, errors.ErrRecordNotFound)
@@ -516,7 +522,7 @@ func Test_Roles_Update(t *testing.T) {
 			name: "Bad request",
 			before: func() {
 				roles.EXPECT().Update(gomock.Any(), &models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}).Return(&models.Role{}, errors.ErrFailedToUpdateRecord)
@@ -532,7 +538,7 @@ func Test_Roles_Update(t *testing.T) {
 			name: "Error",
 			before: func() {
 				roles.EXPECT().Update(gomock.Any(), &models.Role{
-					ID:          uuid.MustParse("10000000-1000-1000-1000-000000000001"),
+					ID:          id,
 					Name:        "admin",
 					Description: "Admin role",
 				}).Return(&models.Role{}, assert.AnError)
@@ -587,6 +593,8 @@ func Test_Roles_Delete(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewRolesController(roles, log)
 
+	id := uuid.MustParse("10000000-1000-1000-1000-000000000001")
+
 	type result struct {
 		error  serializers.ErrorSerializer
 		status string
@@ -602,7 +610,7 @@ func Test_Roles_Delete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				roles.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(true, nil)
+				roles.EXPECT().Delete(gomock.Any(), id).Return(true, nil)
 			},
 			expected: result{
 				status: "204 No Content",
@@ -625,7 +633,7 @@ func Test_Roles_Delete(t *testing.T) {
 		{
 			name: "Not found",
 			before: func() {
-				roles.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(false, errors.ErrRecordNotFound)
+				roles.EXPECT().Delete(gomock.Any(), id).Return(false, errors.ErrRecordNotFound)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: errors.ErrRecordNotFound.Error()},
@@ -636,7 +644,7 @@ func Test_Roles_Delete(t *testing.T) {
 		{
 			name: "Bad request",
 			before: func() {
-				roles.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(false, errors.ErrFailedToDeleteRecord)
+				roles.EXPECT().Delete(gomock.Any(), id).Return(false, errors.ErrFailedToDeleteRecord)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "failed to delete record"},
@@ -647,7 +655,7 @@ func Test_Roles_Delete(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				roles.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-1000-000000000001")).Return(false, assert.AnError)
+				roles.EXPECT().Delete(gomock.Any(), id).Return(false, assert.AnError)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: assert.AnError.Error()},

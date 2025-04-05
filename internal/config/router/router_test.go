@@ -31,6 +31,7 @@ func Test_HealthCheck(t *testing.T) {
 	mockRolesController := controllers.NewMockRolesController(ctrl)
 	mockScopesController := controllers.NewMockScopesController(ctrl)
 	mockTokensController := controllers.NewMockTokensController(ctrl)
+	mockUsersController := controllers.NewMockUsersController(ctrl)
 
 	mockAuthenticationMiddleware.EXPECT().
 		Authenticate(gomock.Any()).
@@ -63,6 +64,7 @@ func Test_HealthCheck(t *testing.T) {
 		mockRolesController,
 		mockScopesController,
 		mockTokensController,
+		mockUsersController,
 	)
 
 	req := httptest.NewRequest(http.MethodHead, "/health", nil)

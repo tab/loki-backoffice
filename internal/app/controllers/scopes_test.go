@@ -179,6 +179,8 @@ func Test_Scopes_Get(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewScopesController(scopes, log)
 
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
+
 	type result struct {
 		response serializers.ScopeSerializer
 		error    serializers.ErrorSerializer
@@ -195,15 +197,15 @@ func Test_Scopes_Get(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				scopes.EXPECT().FindById(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(&models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+				scopes.EXPECT().FindById(gomock.Any(), id).Return(&models.Scope{
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}, nil)
 			},
 			expected: result{
 				response: serializers.ScopeSerializer{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				},
@@ -215,7 +217,7 @@ func Test_Scopes_Get(t *testing.T) {
 		{
 			name: "Not found",
 			before: func() {
-				scopes.EXPECT().FindById(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(&models.Scope{}, errors.ErrRecordNotFound)
+				scopes.EXPECT().FindById(gomock.Any(), id).Return(&models.Scope{}, errors.ErrRecordNotFound)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: errors.ErrRecordNotFound.Error()},
@@ -226,7 +228,7 @@ func Test_Scopes_Get(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				scopes.EXPECT().FindById(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(&models.Scope{}, assert.AnError)
+				scopes.EXPECT().FindById(gomock.Any(), id).Return(&models.Scope{}, assert.AnError)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: assert.AnError.Error()},
@@ -277,6 +279,8 @@ func Test_Scopes_Create(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewScopesController(scopes, log)
 
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
+
 	type result struct {
 		response serializers.ScopeSerializer
 		error    serializers.ErrorSerializer
@@ -298,7 +302,7 @@ func Test_Scopes_Create(t *testing.T) {
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}).Return(&models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}, nil)
@@ -306,7 +310,7 @@ func Test_Scopes_Create(t *testing.T) {
 			body: strings.NewReader(`{"name": "sso-service", "description" :"SSO-service scope"}`),
 			expected: result{
 				response: serializers.ScopeSerializer{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				},
@@ -417,6 +421,8 @@ func Test_Scopes_Update(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewScopesController(scopes, log)
 
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
+
 	type result struct {
 		response serializers.ScopeSerializer
 		error    serializers.ErrorSerializer
@@ -435,11 +441,11 @@ func Test_Scopes_Update(t *testing.T) {
 			name: "Success",
 			before: func() {
 				scopes.EXPECT().Update(gomock.Any(), &models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}).Return(&models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}, nil)
@@ -447,7 +453,7 @@ func Test_Scopes_Update(t *testing.T) {
 			body: strings.NewReader(`{"name": "sso-service", "description": "SSO-service scope"}`),
 			expected: result{
 				response: serializers.ScopeSerializer{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				},
@@ -473,7 +479,7 @@ func Test_Scopes_Update(t *testing.T) {
 			name: "Invalid arguments",
 			before: func() {
 				scopes.EXPECT().Update(gomock.Any(), &models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}).Return(&models.Scope{}, errors.ErrInvalidArguments)
@@ -490,7 +496,7 @@ func Test_Scopes_Update(t *testing.T) {
 			name: "Not found",
 			before: func() {
 				scopes.EXPECT().Update(gomock.Any(), &models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}).Return(&models.Scope{}, errors.ErrRecordNotFound)
@@ -506,7 +512,7 @@ func Test_Scopes_Update(t *testing.T) {
 			name: "Bad request",
 			before: func() {
 				scopes.EXPECT().Update(gomock.Any(), &models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}).Return(&models.Scope{}, errors.ErrFailedToUpdateRecord)
@@ -522,7 +528,7 @@ func Test_Scopes_Update(t *testing.T) {
 			name: "Error",
 			before: func() {
 				scopes.EXPECT().Update(gomock.Any(), &models.Scope{
-					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					ID:          id,
 					Name:        "sso-service",
 					Description: "SSO-service scope",
 				}).Return(&models.Scope{}, assert.AnError)
@@ -577,6 +583,8 @@ func Test_Scopes_Delete(t *testing.T) {
 	log := logger.NewLogger()
 	controller := NewScopesController(scopes, log)
 
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
+
 	type result struct {
 		error  serializers.ErrorSerializer
 		status string
@@ -592,7 +600,7 @@ func Test_Scopes_Delete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				scopes.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(true, nil)
+				scopes.EXPECT().Delete(gomock.Any(), id).Return(true, nil)
 			},
 			expected: result{
 				status: "204 No Content",
@@ -615,7 +623,7 @@ func Test_Scopes_Delete(t *testing.T) {
 		{
 			name: "Not found",
 			before: func() {
-				scopes.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(false, errors.ErrRecordNotFound)
+				scopes.EXPECT().Delete(gomock.Any(), id).Return(false, errors.ErrRecordNotFound)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: errors.ErrRecordNotFound.Error()},
@@ -626,7 +634,7 @@ func Test_Scopes_Delete(t *testing.T) {
 		{
 			name: "Bad request",
 			before: func() {
-				scopes.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(false, errors.ErrFailedToDeleteRecord)
+				scopes.EXPECT().Delete(gomock.Any(), id).Return(false, errors.ErrFailedToDeleteRecord)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: "failed to delete record"},
@@ -637,7 +645,7 @@ func Test_Scopes_Delete(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				scopes.EXPECT().Delete(gomock.Any(), uuid.MustParse("10000000-1000-1000-2000-000000000001")).Return(false, assert.AnError)
+				scopes.EXPECT().Delete(gomock.Any(), id).Return(false, assert.AnError)
 			},
 			expected: result{
 				error:  serializers.ErrorSerializer{Error: assert.AnError.Error()},

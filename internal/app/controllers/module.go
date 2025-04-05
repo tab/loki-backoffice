@@ -8,4 +8,5 @@ var Module = fx.Options(
 	fx.Provide(NewRolesController),
 	fx.Provide(NewScopesController),
 	fx.Provide(NewTokensController),
+	fx.Provide(NewUsersController),
 )

@@ -15,7 +15,7 @@ import (
 	"loki-backoffice/pkg/logger"
 )
 
-type RolesController interface {
+type UsersController interface {
 	List(w http.ResponseWriter, r *http.Request)
 	Get(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
@@ -23,24 +23,24 @@ type RolesController interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-type rolesController struct {
-	roles services.Roles
+type usersController struct {
+	users services.Users
 	log   *logger.Logger
 }
 
-func NewRolesController(roles services.Roles, log *logger.Logger) RolesController {
-	return &rolesController{
-		roles: roles,
+func NewUsersController(users services.Users, log *logger.Logger) UsersController {
+	return &usersController{
+		users: users,
 		log:   log,
 	}
 }
 
 //nolint:dupl
-func (c *rolesController) List(w http.ResponseWriter, r *http.Request) {
+func (c *usersController) List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	pagination := services.NewPagination(r)
-	rows, total, err := c.roles.List(r.Context(), pagination)
+	rows, total, err := c.users.List(r.Context(), pagination)
 	if err != nil {
 		switch {
 		case errors.Is(err, errors.ErrInvalidArguments):
@@ -55,17 +55,19 @@ func (c *rolesController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection := make([]serializers.RoleSerializer, 0, len(rows))
+	collection := make([]serializers.UserSerializer, 0, len(rows))
 
-	for _, role := range rows {
-		collection = append(collection, serializers.RoleSerializer{
-			ID:          role.ID,
-			Name:        role.Name,
-			Description: role.Description,
+	for _, user := range rows {
+		collection = append(collection, serializers.UserSerializer{
+			ID:             user.ID,
+			IdentityNumber: user.IdentityNumber,
+			PersonalCode:   user.PersonalCode,
+			FirstName:      user.FirstName,
+			LastName:       user.LastName,
 		})
 	}
 
-	response := serializers.PaginationResponse[serializers.RoleSerializer]{
+	response := serializers.PaginationResponse[serializers.UserSerializer]{
 		Data: collection,
 		Meta: serializers.PaginationMeta{
 			Page:  pagination.Page,
@@ -79,7 +81,7 @@ func (c *rolesController) List(w http.ResponseWriter, r *http.Request) {
 }
 
 //nolint:dupl
-func (c *rolesController) Get(w http.ResponseWriter, r *http.Request) {
+func (c *usersController) Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
@@ -90,10 +92,10 @@ func (c *rolesController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	record, err := c.roles.FindById(r.Context(), id)
+	record, err := c.users.FindById(r.Context(), id)
 
 	if err != nil {
-		c.log.Error().Err(err).Str("id", id.String()).Msg("Failed to get role")
+		c.log.Error().Err(err).Str("id", id.String()).Msg("Failed to get user")
 
 		switch {
 		case errors.Is(err, errors.ErrRecordNotFound):
@@ -106,11 +108,14 @@ func (c *rolesController) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := serializers.RoleSerializer{
-		ID:            record.ID,
-		Name:          record.Name,
-		Description:   record.Description,
-		PermissionIDs: record.PermissionIDs,
+	response := serializers.UserSerializer{
+		ID:             record.ID,
+		IdentityNumber: record.IdentityNumber,
+		PersonalCode:   record.PersonalCode,
+		FirstName:      record.FirstName,
+		LastName:       record.LastName,
+		RoleIDs:        record.RoleIDs,
+		ScopeIDs:       record.ScopeIDs,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -118,24 +123,27 @@ func (c *rolesController) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 //nolint:dupl
-func (c *rolesController) Create(w http.ResponseWriter, r *http.Request) {
+func (c *usersController) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var params dto.RoleRequest
+	var params dto.UserRequest
 	if err := params.Validate(r.Body); err != nil {
-		c.log.Error().Err(err).Str("name", params.Name).Msg("Failed to create role")
+		c.log.Error().Err(err).Str("identity_number", params.IdentityNumber).Msg("Failed to create user")
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
 		return
 	}
 
-	record, err := c.roles.Create(r.Context(), &models.Role{
-		Name:          params.Name,
-		Description:   params.Description,
-		PermissionIDs: params.PermissionIDs,
+	record, err := c.users.Create(r.Context(), &models.User{
+		IdentityNumber: params.IdentityNumber,
+		PersonalCode:   params.PersonalCode,
+		FirstName:      params.FirstName,
+		LastName:       params.LastName,
+		RoleIDs:        params.RoleIDs,
+		ScopeIDs:       params.ScopeIDs,
 	})
 	if err != nil {
-		c.log.Error().Err(err).Msg("Failed to create role")
+		c.log.Error().Err(err).Msg("Failed to create user")
 
 		switch {
 		case errors.Is(err, errors.ErrInvalidArguments):
@@ -150,10 +158,12 @@ func (c *rolesController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := serializers.RoleSerializer{
-		ID:          record.ID,
-		Name:        record.Name,
-		Description: record.Description,
+	response := serializers.UserSerializer{
+		ID:             record.ID,
+		IdentityNumber: record.IdentityNumber,
+		PersonalCode:   record.PersonalCode,
+		FirstName:      record.FirstName,
+		LastName:       record.LastName,
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -161,7 +171,7 @@ func (c *rolesController) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 ////nolint:dupl
-func (c *rolesController) Update(w http.ResponseWriter, r *http.Request) {
+func (c *usersController) Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
@@ -172,22 +182,25 @@ func (c *rolesController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var params dto.RoleRequest
+	var params dto.UserRequest
 	if err = params.Validate(r.Body); err != nil {
-		c.log.Error().Err(err).Str("name", params.Name).Msg("Failed to create role")
+		c.log.Error().Err(err).Str("identity_number", params.IdentityNumber).Msg("Failed to create user")
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(serializers.ErrorSerializer{Error: err.Error()})
 		return
 	}
 
-	record, err := c.roles.Update(r.Context(), &models.Role{
-		ID:            id,
-		Name:          params.Name,
-		Description:   params.Description,
-		PermissionIDs: params.PermissionIDs,
+	record, err := c.users.Update(r.Context(), &models.User{
+		ID:             id,
+		IdentityNumber: params.IdentityNumber,
+		PersonalCode:   params.PersonalCode,
+		FirstName:      params.FirstName,
+		LastName:       params.LastName,
+		RoleIDs:        params.RoleIDs,
+		ScopeIDs:       params.ScopeIDs,
 	})
 	if err != nil {
-		c.log.Error().Err(err).Str("id", id.String()).Msg("Failed to update role")
+		c.log.Error().Err(err).Str("id", id.String()).Msg("Failed to update user")
 
 		switch {
 		case errors.Is(err, errors.ErrInvalidArguments):
@@ -204,10 +217,12 @@ func (c *rolesController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := serializers.RoleSerializer{
-		ID:          record.ID,
-		Name:        record.Name,
-		Description: record.Description,
+	response := serializers.UserSerializer{
+		ID:             record.ID,
+		IdentityNumber: record.IdentityNumber,
+		PersonalCode:   record.PersonalCode,
+		FirstName:      record.FirstName,
+		LastName:       record.LastName,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -215,7 +230,7 @@ func (c *rolesController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 //nolint:dupl
-func (c *rolesController) Delete(w http.ResponseWriter, r *http.Request) {
+func (c *usersController) Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
@@ -226,9 +241,9 @@ func (c *rolesController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.roles.Delete(r.Context(), id)
+	_, err = c.users.Delete(r.Context(), id)
 	if err != nil {
-		c.log.Error().Err(err).Str("id", id.String()).Msg("Failed to delete role")
+		c.log.Error().Err(err).Str("id", id.String()).Msg("Failed to delete user")
 
 		switch {
 		case errors.Is(err, errors.ErrInvalidArguments):
