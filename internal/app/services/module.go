@@ -27,4 +27,10 @@ var Module = fx.Options(
 		},
 		NewScopes,
 	),
+	fx.Provide(
+		func(registry *rpcs.Registry) proto.TokenServiceClient {
+			return registry.GetTokenClient()
+		},
+		NewTokens,
+	),
 )
