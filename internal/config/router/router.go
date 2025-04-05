@@ -23,6 +23,7 @@ func NewRouter(
 	health controllers.HealthController,
 
 	permissions controllers.PermissionsController,
+	roles controllers.RolesController,
 	scopes controllers.ScopesController,
 ) http.Handler {
 	r := chi.NewRouter()
@@ -52,6 +53,12 @@ func NewRouter(
 			r.With(authorization.Check(rbac.WritePermissions)).Post("/permissions", permissions.Create)
 			r.With(authorization.Check(rbac.WritePermissions)).Put("/permissions/{id}", permissions.Update)
 			r.With(authorization.Check(rbac.WritePermissions)).Delete("/permissions/{id}", permissions.Delete)
+
+			r.With(authorization.Check(rbac.ReadRoles)).Get("/roles", roles.List)
+			r.With(authorization.Check(rbac.ReadRoles)).Get("/roles/{id}", roles.Get)
+			r.With(authorization.Check(rbac.WriteRoles)).Post("/roles", roles.Create)
+			r.With(authorization.Check(rbac.WriteRoles)).Put("/roles/{id}", roles.Update)
+			r.With(authorization.Check(rbac.WriteRoles)).Delete("/roles/{id}", roles.Delete)
 
 			r.With(authorization.Check(rbac.ReadScopes)).Get("/scopes", scopes.List)
 			r.With(authorization.Check(rbac.ReadScopes)).Get("/scopes/{id}", scopes.Get)

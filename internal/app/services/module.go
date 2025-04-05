@@ -16,6 +16,12 @@ var Module = fx.Options(
 		NewPermissions,
 	),
 	fx.Provide(
+		func(registry *rpcs.Registry) proto.RoleServiceClient {
+			return registry.GetRoleClient()
+		},
+		NewRoles,
+	),
+	fx.Provide(
 		func(registry *rpcs.Registry) proto.ScopeServiceClient {
 			return registry.GetScopeClient()
 		},
