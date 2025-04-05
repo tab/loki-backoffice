@@ -13,34 +13,34 @@ import (
 	"loki-backoffice/pkg/logger"
 )
 
-type Permissions interface {
-	List(ctx context.Context, pagination *Pagination) ([]models.Permission, uint64, error)
-	FindById(ctx context.Context, id uuid.UUID) (*models.Permission, error)
-	Create(ctx context.Context, params *models.Permission) (*models.Permission, error)
-	Update(ctx context.Context, params *models.Permission) (*models.Permission, error)
+type Scopes interface {
+	List(ctx context.Context, pagination *Pagination) ([]models.Scope, uint64, error)
+	FindById(ctx context.Context, id uuid.UUID) (*models.Scope, error)
+	Create(ctx context.Context, params *models.Scope) (*models.Scope, error)
+	Update(ctx context.Context, params *models.Scope) (*models.Scope, error)
 	Delete(ctx context.Context, id uuid.UUID) (bool, error)
 }
 
-type permissions struct {
-	client proto.PermissionServiceClient
+type scopes struct {
+	client proto.ScopeServiceClient
 	log    *logger.Logger
 }
 
-func NewPermissions(client proto.PermissionServiceClient, log *logger.Logger) Permissions {
-	return &permissions{
+func NewScopes(client proto.ScopeServiceClient, log *logger.Logger) Scopes {
+	return &scopes{
 		client: client,
 		log:    log,
 	}
 }
 
 //nolint:dupl
-func (p *permissions) List(ctx context.Context, pagination *Pagination) ([]models.Permission, uint64, error) {
+func (p *scopes) List(ctx context.Context, pagination *Pagination) ([]models.Scope, uint64, error) {
 	response, err := p.client.List(ctx, &proto.PaginatedListRequest{
 		Limit:  pagination.Page,
 		Offset: pagination.PerPage,
 	})
 	if err != nil {
-		p.log.Error().Err(err).Msg("Failed to fetch permissions")
+		p.log.Error().Err(err).Msg("Failed to fetch scopes")
 
 		st, ok := status.FromError(err)
 		if ok {
@@ -57,9 +57,9 @@ func (p *permissions) List(ctx context.Context, pagination *Pagination) ([]model
 		return nil, 0, err
 	}
 
-	collection := make([]models.Permission, 0, len(response.Data))
+	collection := make([]models.Scope, 0, len(response.Data))
 	for _, item := range response.Data {
-		collection = append(collection, models.Permission{
+		collection = append(collection, models.Scope{
 			ID:          uuid.MustParse(item.Id),
 			Name:        item.Name,
 			Description: item.Description,
@@ -70,12 +70,12 @@ func (p *permissions) List(ctx context.Context, pagination *Pagination) ([]model
 }
 
 //nolint:dupl
-func (p *permissions) FindById(ctx context.Context, id uuid.UUID) (*models.Permission, error) {
-	response, err := p.client.Get(ctx, &proto.GetPermissionRequest{
+func (p *scopes) FindById(ctx context.Context, id uuid.UUID) (*models.Scope, error) {
+	response, err := p.client.Get(ctx, &proto.GetScopeRequest{
 		Id: id.String(),
 	})
 	if err != nil {
-		p.log.Error().Err(err).Str("id", id.String()).Msg("Failed to get permission")
+		p.log.Error().Err(err).Str("id", id.String()).Msg("Failed to get scope")
 
 		st, ok := status.FromError(err)
 		if ok {
@@ -92,7 +92,7 @@ func (p *permissions) FindById(ctx context.Context, id uuid.UUID) (*models.Permi
 		return nil, err
 	}
 
-	return &models.Permission{
+	return &models.Scope{
 		ID:          uuid.MustParse(response.Data.Id),
 		Name:        response.Data.Name,
 		Description: response.Data.Description,
@@ -100,13 +100,13 @@ func (p *permissions) FindById(ctx context.Context, id uuid.UUID) (*models.Permi
 }
 
 //nolint:dupl
-func (p *permissions) Create(ctx context.Context, params *models.Permission) (*models.Permission, error) {
-	response, err := p.client.Create(ctx, &proto.CreatePermissionRequest{
+func (p *scopes) Create(ctx context.Context, params *models.Scope) (*models.Scope, error) {
+	response, err := p.client.Create(ctx, &proto.CreateScopeRequest{
 		Name:        params.Name,
 		Description: params.Description,
 	})
 	if err != nil {
-		p.log.Error().Err(err).Str("name", params.Name).Msg("Failed to create permission")
+		p.log.Error().Err(err).Str("name", params.Name).Msg("Failed to create scope")
 
 		st, ok := status.FromError(err)
 		if ok {
@@ -121,7 +121,7 @@ func (p *permissions) Create(ctx context.Context, params *models.Permission) (*m
 		return nil, err
 	}
 
-	return &models.Permission{
+	return &models.Scope{
 		ID:          uuid.MustParse(response.Data.Id),
 		Name:        response.Data.Name,
 		Description: response.Data.Description,
@@ -129,14 +129,14 @@ func (p *permissions) Create(ctx context.Context, params *models.Permission) (*m
 }
 
 //nolint:dupl
-func (p *permissions) Update(ctx context.Context, params *models.Permission) (*models.Permission, error) {
-	response, err := p.client.Update(ctx, &proto.UpdatePermissionRequest{
+func (p *scopes) Update(ctx context.Context, params *models.Scope) (*models.Scope, error) {
+	response, err := p.client.Update(ctx, &proto.UpdateScopeRequest{
 		Id:          params.ID.String(),
 		Name:        params.Name,
 		Description: params.Description,
 	})
 	if err != nil {
-		p.log.Error().Err(err).Str("id", params.ID.String()).Msg("Failed to update permission")
+		p.log.Error().Err(err).Str("id", params.ID.String()).Msg("Failed to update scope")
 
 		st, ok := status.FromError(err)
 		if ok {
@@ -153,7 +153,7 @@ func (p *permissions) Update(ctx context.Context, params *models.Permission) (*m
 		return nil, err
 	}
 
-	return &models.Permission{
+	return &models.Scope{
 		ID:          uuid.MustParse(response.Data.Id),
 		Name:        response.Data.Name,
 		Description: response.Data.Description,
@@ -161,12 +161,12 @@ func (p *permissions) Update(ctx context.Context, params *models.Permission) (*m
 }
 
 //nolint:dupl
-func (p *permissions) Delete(ctx context.Context, id uuid.UUID) (bool, error) {
-	_, err := p.client.Delete(ctx, &proto.DeletePermissionRequest{
+func (p *scopes) Delete(ctx context.Context, id uuid.UUID) (bool, error) {
+	_, err := p.client.Delete(ctx, &proto.DeleteScopeRequest{
 		Id: id.String(),
 	})
 	if err != nil {
-		p.log.Error().Err(err).Str("id", id.String()).Msg("Failed to delete permission")
+		p.log.Error().Err(err).Str("id", id.String()).Msg("Failed to delete scope")
 
 		st, ok := status.FromError(err)
 		if ok {

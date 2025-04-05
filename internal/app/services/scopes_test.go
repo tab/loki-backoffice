@@ -18,19 +18,19 @@ import (
 	"loki-backoffice/pkg/logger"
 )
 
-func Test_Permissions_List(t *testing.T) {
+func Test_Scopes_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
-	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
+	mockClient := rpcs.NewMockScopeServiceClient(ctrl)
 	log := logger.NewLogger()
-	service := NewPermissions(mockClient, log)
+	service := NewScopes(mockClient, log)
 
 	tests := []struct {
 		name     string
 		before   func()
-		expected []models.Permission
+		expected []models.Scope
 		total    uint64
 		error    error
 	}{
@@ -40,17 +40,17 @@ func Test_Permissions_List(t *testing.T) {
 				mockClient.EXPECT().List(ctx, &proto.PaginatedListRequest{
 					Limit:  uint64(1),
 					Offset: uint64(10),
-				}).Return(&proto.ListPermissionsResponse{
-					Data: []*proto.Permission{
+				}).Return(&proto.ListScopesResponse{
+					Data: []*proto.Scope{
 						{
-							Id:          "10000000-1000-1000-3000-000000000001",
-							Name:        "read:self",
-							Description: "Read own data",
+							Id:          "10000000-1000-1000-2000-000000000001",
+							Name:        "sso-service",
+							Description: "SSO-service scope",
 						},
 						{
-							Id:          "10000000-1000-1000-3000-000000000002",
-							Name:        "write:self",
-							Description: "Write own data",
+							Id:          "10000000-1000-1000-2000-000000000002",
+							Name:        "self-service",
+							Description: "Self-service scope",
 						},
 					},
 					Meta: &proto.PaginationMeta{
@@ -60,16 +60,16 @@ func Test_Permissions_List(t *testing.T) {
 					},
 				}, nil)
 			},
-			expected: []models.Permission{
+			expected: []models.Scope{
 				{
-					ID:          uuid.MustParse("10000000-1000-1000-3000-000000000001"),
-					Name:        "read:self",
-					Description: "Read own data",
+					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				},
 				{
-					ID:          uuid.MustParse("10000000-1000-1000-3000-000000000002"),
-					Name:        "write:self",
-					Description: "Write own data",
+					ID:          uuid.MustParse("10000000-1000-1000-2000-000000000002"),
+					Name:        "self-service",
+					Description: "Self-service scope",
 				},
 			},
 			total: 2,
@@ -81,8 +81,8 @@ func Test_Permissions_List(t *testing.T) {
 				mockClient.EXPECT().List(ctx, &proto.PaginatedListRequest{
 					Limit:  uint64(1),
 					Offset: uint64(10),
-				}).Return(&proto.ListPermissionsResponse{
-					Data: []*proto.Permission{},
+				}).Return(&proto.ListScopesResponse{
+					Data: []*proto.Scope{},
 					Meta: &proto.PaginationMeta{
 						Page:  1,
 						Per:   10,
@@ -90,7 +90,7 @@ func Test_Permissions_List(t *testing.T) {
 					},
 				}, nil)
 			},
-			expected: []models.Permission{},
+			expected: []models.Scope{},
 			total:    0,
 			error:    nil,
 		},
@@ -167,48 +167,48 @@ func Test_Permissions_List(t *testing.T) {
 	}
 }
 
-func Test_Permissions_FindById(t *testing.T) {
+func Test_Scopes_FindById(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
-	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
+	mockClient := rpcs.NewMockScopeServiceClient(ctrl)
 	log := logger.NewLogger()
-	service := NewPermissions(mockClient, log)
+	service := NewScopes(mockClient, log)
 
-	id := uuid.MustParse("10000000-1000-1000-3000-000000000001")
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
 
 	tests := []struct {
 		name     string
 		before   func()
-		expected *models.Permission
+		expected *models.Scope
 		error    error
 	}{
 		{
 			name: "Success",
 			before: func() {
-				mockClient.EXPECT().Get(ctx, &proto.GetPermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
-				}).Return(&proto.GetPermissionResponse{
-					Data: &proto.Permission{
-						Id:          "10000000-1000-1000-3000-000000000001",
-						Name:        "read:self",
-						Description: "Read own data",
+				mockClient.EXPECT().Get(ctx, &proto.GetScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
+				}).Return(&proto.GetScopeResponse{
+					Data: &proto.Scope{
+						Id:          "10000000-1000-1000-2000-000000000001",
+						Name:        "sso-service",
+						Description: "SSO-service scope",
 					},
 				}, nil)
 			},
-			expected: &models.Permission{
+			expected: &models.Scope{
 				ID:          id,
-				Name:        "read:self",
-				Description: "Read own data",
+				Name:        "sso-service",
+				Description: "SSO-service scope",
 			},
 			error: nil,
 		},
 		{
 			name: "InvalidArgument status code",
 			before: func() {
-				mockClient.EXPECT().Get(ctx, &proto.GetPermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Get(ctx, &proto.GetScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, status.Error(codes.InvalidArgument, "invalid arguments"))
 			},
 			expected: nil,
@@ -217,8 +217,8 @@ func Test_Permissions_FindById(t *testing.T) {
 		{
 			name: "NotFound status code",
 			before: func() {
-				mockClient.EXPECT().Get(ctx, &proto.GetPermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Get(ctx, &proto.GetScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, status.Error(codes.NotFound, "not found"))
 			},
 			expected: nil,
@@ -227,8 +227,8 @@ func Test_Permissions_FindById(t *testing.T) {
 		{
 			name: "Internal status code",
 			before: func() {
-				mockClient.EXPECT().Get(ctx, &proto.GetPermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Get(ctx, &proto.GetScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, status.Error(codes.Internal, "internal error"))
 			},
 			expected: nil,
@@ -237,8 +237,8 @@ func Test_Permissions_FindById(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				mockClient.EXPECT().Get(ctx, &proto.GetPermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Get(ctx, &proto.GetScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, assert.AnError)
 			},
 			expected: nil,
@@ -264,53 +264,53 @@ func Test_Permissions_FindById(t *testing.T) {
 	}
 }
 
-func Test_Permissions_Create(t *testing.T) {
+func Test_Scopes_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
-	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
+	mockClient := rpcs.NewMockScopeServiceClient(ctrl)
 	log := logger.NewLogger()
-	service := NewPermissions(mockClient, log)
+	service := NewScopes(mockClient, log)
 
-	params := &models.Permission{
-		Name:        models.ReadSelfType,
-		Description: "Read own data",
+	params := &models.Scope{
+		Name:        models.SsoServiceType,
+		Description: "SSO-service scope",
 	}
 
 	tests := []struct {
 		name     string
 		before   func()
-		expected *models.Permission
+		expected *models.Scope
 		error    error
 	}{
 		{
 			name: "Success",
 			before: func() {
-				mockClient.EXPECT().Create(ctx, &proto.CreatePermissionRequest{
-					Name:        "read:self",
-					Description: "Read own data",
-				}).Return(&proto.CreatePermissionResponse{
-					Data: &proto.Permission{
-						Id:          "10000000-1000-1000-3000-000000000001",
-						Name:        "read:self",
-						Description: "Read own data",
+				mockClient.EXPECT().Create(ctx, &proto.CreateScopeRequest{
+					Name:        "sso-service",
+					Description: "SSO-service scope",
+				}).Return(&proto.CreateScopeResponse{
+					Data: &proto.Scope{
+						Id:          "10000000-1000-1000-2000-000000000001",
+						Name:        "sso-service",
+						Description: "SSO-service scope",
 					},
 				}, nil)
 			},
-			expected: &models.Permission{
-				ID:          uuid.MustParse("10000000-1000-1000-3000-000000000001"),
-				Name:        "read:self",
-				Description: "Read own data",
+			expected: &models.Scope{
+				ID:          uuid.MustParse("10000000-1000-1000-2000-000000000001"),
+				Name:        "sso-service",
+				Description: "SSO-service scope",
 			},
 			error: nil,
 		},
 		{
 			name: "InvalidArgument status code",
 			before: func() {
-				mockClient.EXPECT().Create(ctx, &proto.CreatePermissionRequest{
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Create(ctx, &proto.CreateScopeRequest{
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, status.Error(codes.InvalidArgument, "invalid arguments"))
 			},
 			expected: nil,
@@ -319,9 +319,9 @@ func Test_Permissions_Create(t *testing.T) {
 		{
 			name: "Internal status code",
 			before: func() {
-				mockClient.EXPECT().Create(ctx, &proto.CreatePermissionRequest{
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Create(ctx, &proto.CreateScopeRequest{
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, status.Error(codes.Internal, "internal error"))
 			},
 			expected: nil,
@@ -330,9 +330,9 @@ func Test_Permissions_Create(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				mockClient.EXPECT().Create(ctx, &proto.CreatePermissionRequest{
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Create(ctx, &proto.CreateScopeRequest{
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, assert.AnError)
 			},
 			expected: nil,
@@ -358,57 +358,57 @@ func Test_Permissions_Create(t *testing.T) {
 	}
 }
 
-func Test_Permissions_Update(t *testing.T) {
+func Test_Scopes_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
-	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
+	mockClient := rpcs.NewMockScopeServiceClient(ctrl)
 	log := logger.NewLogger()
-	service := NewPermissions(mockClient, log)
+	service := NewScopes(mockClient, log)
 
-	id := uuid.MustParse("10000000-1000-1000-3000-000000000001")
-	params := &models.Permission{
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
+	params := &models.Scope{
 		ID:          id,
-		Name:        models.ReadSelfType,
-		Description: "Read own data",
+		Name:        models.SsoServiceType,
+		Description: "SSO-service scope",
 	}
 
 	tests := []struct {
 		name     string
 		before   func()
-		expected *models.Permission
+		expected *models.Scope
 		error    error
 	}{
 		{
 			name: "Success",
 			before: func() {
-				mockClient.EXPECT().Update(ctx, &proto.UpdatePermissionRequest{
-					Id:          "10000000-1000-1000-3000-000000000001",
-					Name:        "read:self",
-					Description: "Read own data",
-				}).Return(&proto.UpdatePermissionResponse{
-					Data: &proto.Permission{
-						Id:          "10000000-1000-1000-3000-000000000001",
-						Name:        "read:self",
-						Description: "Read own data",
+				mockClient.EXPECT().Update(ctx, &proto.UpdateScopeRequest{
+					Id:          "10000000-1000-1000-2000-000000000001",
+					Name:        "sso-service",
+					Description: "SSO-service scope",
+				}).Return(&proto.UpdateScopeResponse{
+					Data: &proto.Scope{
+						Id:          "10000000-1000-1000-2000-000000000001",
+						Name:        "sso-service",
+						Description: "SSO-service scope",
 					},
 				}, nil)
 			},
-			expected: &models.Permission{
+			expected: &models.Scope{
 				ID:          id,
-				Name:        "read:self",
-				Description: "Read own data",
+				Name:        "sso-service",
+				Description: "SSO-service scope",
 			},
 			error: nil,
 		},
 		{
 			name: "InvalidArgument status code",
 			before: func() {
-				mockClient.EXPECT().Update(ctx, &proto.UpdatePermissionRequest{
-					Id:          "10000000-1000-1000-3000-000000000001",
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Update(ctx, &proto.UpdateScopeRequest{
+					Id:          "10000000-1000-1000-2000-000000000001",
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, status.Error(codes.InvalidArgument, "invalid arguments"))
 			},
 			expected: nil,
@@ -417,10 +417,10 @@ func Test_Permissions_Update(t *testing.T) {
 		{
 			name: "NotFound status code",
 			before: func() {
-				mockClient.EXPECT().Update(ctx, &proto.UpdatePermissionRequest{
-					Id:          "10000000-1000-1000-3000-000000000001",
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Update(ctx, &proto.UpdateScopeRequest{
+					Id:          "10000000-1000-1000-2000-000000000001",
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, status.Error(codes.NotFound, "not found"))
 			},
 			expected: nil,
@@ -429,10 +429,10 @@ func Test_Permissions_Update(t *testing.T) {
 		{
 			name: "Internal status code",
 			before: func() {
-				mockClient.EXPECT().Update(ctx, &proto.UpdatePermissionRequest{
-					Id:          "10000000-1000-1000-3000-000000000001",
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Update(ctx, &proto.UpdateScopeRequest{
+					Id:          "10000000-1000-1000-2000-000000000001",
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, status.Error(codes.Internal, "internal error"))
 			},
 			expected: nil,
@@ -441,10 +441,10 @@ func Test_Permissions_Update(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				mockClient.EXPECT().Update(ctx, &proto.UpdatePermissionRequest{
-					Id:          "10000000-1000-1000-3000-000000000001",
-					Name:        "read:self",
-					Description: "Read own data",
+				mockClient.EXPECT().Update(ctx, &proto.UpdateScopeRequest{
+					Id:          "10000000-1000-1000-2000-000000000001",
+					Name:        "sso-service",
+					Description: "SSO-service scope",
 				}).Return(nil, assert.AnError)
 			},
 			expected: nil,
@@ -470,16 +470,16 @@ func Test_Permissions_Update(t *testing.T) {
 	}
 }
 
-func Test_Permissions_Delete(t *testing.T) {
+func Test_Scopes_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	ctx := context.Background()
-	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
+	mockClient := rpcs.NewMockScopeServiceClient(ctrl)
 	log := logger.NewLogger()
-	service := NewPermissions(mockClient, log)
+	service := NewScopes(mockClient, log)
 
-	id := uuid.MustParse("10000000-1000-1000-3000-000000000001")
+	id := uuid.MustParse("10000000-1000-1000-2000-000000000001")
 
 	tests := []struct {
 		name     string
@@ -490,8 +490,8 @@ func Test_Permissions_Delete(t *testing.T) {
 		{
 			name: "Success",
 			before: func() {
-				mockClient.EXPECT().Delete(ctx, &proto.DeletePermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Delete(ctx, &proto.DeleteScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(&emptypb.Empty{}, nil)
 			},
 			expected: true,
@@ -500,8 +500,8 @@ func Test_Permissions_Delete(t *testing.T) {
 		{
 			name: "InvalidArgument status code",
 			before: func() {
-				mockClient.EXPECT().Delete(ctx, &proto.DeletePermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Delete(ctx, &proto.DeleteScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, status.Error(codes.InvalidArgument, "invalid arguments"))
 			},
 			expected: false,
@@ -510,8 +510,8 @@ func Test_Permissions_Delete(t *testing.T) {
 		{
 			name: "NotFound status code",
 			before: func() {
-				mockClient.EXPECT().Delete(ctx, &proto.DeletePermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Delete(ctx, &proto.DeleteScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, status.Error(codes.NotFound, "not found"))
 			},
 			expected: false,
@@ -520,8 +520,8 @@ func Test_Permissions_Delete(t *testing.T) {
 		{
 			name: "Internal status code",
 			before: func() {
-				mockClient.EXPECT().Delete(ctx, &proto.DeletePermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Delete(ctx, &proto.DeleteScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, status.Error(codes.Internal, "internal error"))
 			},
 			expected: false,
@@ -530,8 +530,8 @@ func Test_Permissions_Delete(t *testing.T) {
 		{
 			name: "Error",
 			before: func() {
-				mockClient.EXPECT().Delete(ctx, &proto.DeletePermissionRequest{
-					Id: "10000000-1000-1000-3000-000000000001",
+				mockClient.EXPECT().Delete(ctx, &proto.DeleteScopeRequest{
+					Id: "10000000-1000-1000-2000-000000000001",
 				}).Return(nil, assert.AnError)
 			},
 			expected: false,
