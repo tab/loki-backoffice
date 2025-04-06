@@ -16,15 +16,22 @@ import (
 	"loki-backoffice/internal/app/models"
 	"loki-backoffice/internal/app/serializers"
 	"loki-backoffice/internal/app/services"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 )
 
 func Test_Tokens_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	tokens := services.NewMockTokens(ctrl)
-	log := logger.NewLogger()
 	controller := NewTokensController(tokens, log)
 
 	accessTokenExp := time.Now().Add(models.AccessTokenExp)
@@ -193,8 +200,14 @@ func Test_Tokens_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	tokens := services.NewMockTokens(ctrl)
-	log := logger.NewLogger()
 	controller := NewTokensController(tokens, log)
 
 	type result struct {

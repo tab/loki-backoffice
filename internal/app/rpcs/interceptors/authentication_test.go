@@ -8,15 +8,21 @@ import (
 	"go.uber.org/mock/gomock"
 	"google.golang.org/grpc"
 
+	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 	"loki-backoffice/internal/config/middlewares"
-	"loki-backoffice/pkg/logger"
 )
 
 func Test_AuthenticationInterceptor_Authenticate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	log := logger.NewLogger()
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
 	authInterceptor := NewAuthenticationInterceptor(log)
 
 	mockInvoker := func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {

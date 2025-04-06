@@ -14,7 +14,7 @@ import (
 
 	"loki-backoffice/internal/app/rpcs/interceptors"
 	"loki-backoffice/internal/config"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config/logger"
 )
 
 const (

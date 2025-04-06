@@ -12,12 +12,12 @@ import (
 	"loki-backoffice/internal/app/rpcs"
 	"loki-backoffice/internal/app/services"
 	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 	"loki-backoffice/internal/config/middlewares"
 	"loki-backoffice/internal/config/router"
 	"loki-backoffice/internal/config/server"
 	"loki-backoffice/internal/config/telemetry"
 	"loki-backoffice/pkg/jwt"
-	"loki-backoffice/pkg/logger"
 )
 
 var Module = fx.Options(

@@ -11,18 +11,24 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"loki-backoffice/internal/app/errors"
+	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 	"loki-backoffice/pkg/jwt"
-	"loki-backoffice/pkg/logger"
 )
 
 func Test_NewAuthenticationMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
 	jwtService := jwt.NewMockJwt(ctrl)
-	log := logger.NewLogger()
-	middleware := NewAuthenticationMiddleware(jwtService, log)
 
+	middleware := NewAuthenticationMiddleware(jwtService, log)
 	assert.NotNil(t, middleware)
 }
 
@@ -30,8 +36,14 @@ func Test_AuthenticationMiddleware_Authenticate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	jwtService := jwt.NewMockJwt(ctrl)
-	log := logger.NewLogger()
 	middleware := NewAuthenticationMiddleware(jwtService, log)
 
 	identityNumber := "PNOEE-123456789"

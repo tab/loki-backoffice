@@ -17,16 +17,23 @@ import (
 	"loki-backoffice/internal/app/models"
 	"loki-backoffice/internal/app/rpcs"
 	proto "loki-backoffice/internal/app/rpcs/proto/sso/v1"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 )
 
 func Test_Tokens_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockTokenServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewTokens(mockClient, log)
 
 	accessTokenExp := time.Now().Add(models.AccessTokenExp)
@@ -191,9 +198,15 @@ func Test_Tokens_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockTokenServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewTokens(mockClient, log)
 
 	id := uuid.MustParse("10000000-1000-1000-6000-000000000001")

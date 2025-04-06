@@ -20,3 +20,8 @@ func CurrentTokenFromContext(ctx context.Context) (string, bool) {
 	t, ok := ctx.Value(Token{}).(string)
 	return t, ok
 }
+
+func CurrentTraceIdFromContext(ctx context.Context) (string, bool) {
+	t, ok := ctx.Value(TraceId{}).(string)
+	return t, ok
+}
