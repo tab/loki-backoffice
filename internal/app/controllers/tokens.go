@@ -10,7 +10,7 @@ import (
 	"loki-backoffice/internal/app/errors"
 	"loki-backoffice/internal/app/serializers"
 	"loki-backoffice/internal/app/services"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config/logger"
 )
 
 type TokensController interface {

@@ -12,7 +12,7 @@ import (
 	"loki-backoffice/internal/app/models/dto"
 	"loki-backoffice/internal/app/serializers"
 	"loki-backoffice/internal/app/services"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config/logger"
 )
 
 type RolesController interface {

@@ -10,7 +10,7 @@ import (
 	"loki-backoffice/internal/app/errors"
 	"loki-backoffice/internal/app/models"
 	proto "loki-backoffice/internal/app/rpcs/proto/sso/v1"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config/logger"
 )
 
 type Users interface {

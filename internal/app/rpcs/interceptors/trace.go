@@ -42,7 +42,7 @@ func (i *traceInterceptor) Trace() grpc.UnaryClientInterceptor {
 		ctx = metadata.AppendToOutgoingContext(ctx,
 			RequestId, requestId,
 			TraceId, traceId,
-			middlewares.AuthenticationTraceKey, traceId)
+			middlewares.TraceKey, traceId)
 
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}

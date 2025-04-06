@@ -6,7 +6,7 @@ import (
 
 	"loki-backoffice/internal/app/errors"
 	"loki-backoffice/internal/app/serializers"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config/logger"
 	"loki-backoffice/pkg/rbac"
 )
 

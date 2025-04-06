@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"loki-backoffice/internal/app/serializers"
+	"loki-backoffice/internal/config/logger"
 	"loki-backoffice/pkg/jwt"
-	"loki-backoffice/pkg/logger"
 )
 
 type AuthenticationMiddleware interface {

@@ -15,16 +15,23 @@ import (
 	"loki-backoffice/internal/app/models"
 	"loki-backoffice/internal/app/rpcs"
 	proto "loki-backoffice/internal/app/rpcs/proto/sso/v1"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 )
 
 func Test_Permissions_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewPermissions(mockClient, log)
 
 	tests := []struct {
@@ -171,9 +178,15 @@ func Test_Permissions_FindById(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewPermissions(mockClient, log)
 
 	id := uuid.MustParse("10000000-1000-1000-3000-000000000001")
@@ -268,9 +281,15 @@ func Test_Permissions_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewPermissions(mockClient, log)
 
 	params := &models.Permission{
@@ -362,9 +381,15 @@ func Test_Permissions_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewPermissions(mockClient, log)
 
 	id := uuid.MustParse("10000000-1000-1000-3000-000000000001")
@@ -474,9 +499,15 @@ func Test_Permissions_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	ctx := context.Background()
 	mockClient := rpcs.NewMockPermissionServiceClient(ctrl)
-	log := logger.NewLogger()
 	service := NewPermissions(mockClient, log)
 
 	id := uuid.MustParse("10000000-1000-1000-3000-000000000001")

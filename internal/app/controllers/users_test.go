@@ -17,15 +17,22 @@ import (
 	"loki-backoffice/internal/app/models"
 	"loki-backoffice/internal/app/serializers"
 	"loki-backoffice/internal/app/services"
-	"loki-backoffice/pkg/logger"
+	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 )
 
 func Test_Users_List(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	users := services.NewMockUsers(ctrl)
-	log := logger.NewLogger()
 	controller := NewUsersController(users, log)
 
 	type result struct {
@@ -183,8 +190,14 @@ func Test_Users_Get(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	users := services.NewMockUsers(ctrl)
-	log := logger.NewLogger()
 	controller := NewUsersController(users, log)
 
 	id := uuid.MustParse("10000000-1000-1000-1234-000000000001")
@@ -299,8 +312,14 @@ func Test_Users_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	users := services.NewMockUsers(ctrl)
-	log := logger.NewLogger()
 	controller := NewUsersController(users, log)
 
 	id := uuid.MustParse("10000000-1000-1000-1234-000000000001")
@@ -453,8 +472,14 @@ func Test_Users_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	users := services.NewMockUsers(ctrl)
-	log := logger.NewLogger()
 	controller := NewUsersController(users, log)
 
 	id := uuid.MustParse("10000000-1000-1000-1234-000000000001")
@@ -629,8 +654,14 @@ func Test_Users_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	cfg := &config.Config{
+		AppEnv:   "test",
+		AppAddr:  "localhost:8080",
+		LogLevel: "info",
+	}
+	log := logger.NewLogger(cfg)
+
 	users := services.NewMockUsers(ctrl)
-	log := logger.NewLogger()
 	controller := NewUsersController(users, log)
 
 	id := uuid.MustParse("10000000-1000-1000-1234-000000000001")
