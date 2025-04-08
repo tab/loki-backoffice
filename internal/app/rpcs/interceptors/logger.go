@@ -4,12 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"loki-backoffice/internal/config/logger"
-	"loki-backoffice/internal/config/middlewares"
 )
 
 type LoggerInterceptor interface {
@@ -30,10 +29,11 @@ func (i *loggerInterceptor) Log() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		startTime := time.Now()
 
+		traceId := extractTraceId(ctx)
+		requestId := extractRequestId(ctx)
+
 		err := invoker(ctx, method, req, reply, cc, opts...)
 
-		requestId := middleware.GetReqID(ctx)
-		traceId, _ := middlewares.CurrentTraceIdFromContext(ctx)
 		code := status.Code(err).String()
 		duration := time.Since(startTime)
 
@@ -50,4 +50,32 @@ func (i *loggerInterceptor) Log() grpc.UnaryClientInterceptor {
 
 		return err
 	}
+}
+
+func extractTraceId(ctx context.Context) string {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		return ""
+	}
+
+	traceId := md.Get(TraceId)
+	if len(traceId) == 0 {
+		return ""
+	}
+
+	return traceId[0]
+}
+
+func extractRequestId(ctx context.Context) string {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		return ""
+	}
+
+	requestId := md.Get(RequestId)
+	if len(requestId) == 0 {
+		return ""
+	}
+
+	return requestId[0]
 }
