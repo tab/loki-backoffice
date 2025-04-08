@@ -28,21 +28,17 @@ func NewTraceInterceptor() TraceInterceptor {
 
 func (i *traceInterceptor) Trace() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		requestId := middleware.GetReqID(ctx)
-
-		if requestId == "" {
-			requestId = uuid.New().String()
-		}
-
 		traceId, ok := ctx.Value(middlewares.TraceId{}).(string)
 		if !ok || traceId == "" {
 			traceId = uuid.New().String()
 		}
 
-		ctx = metadata.AppendToOutgoingContext(ctx,
-			RequestId, requestId,
-			TraceId, traceId,
-			middlewares.TraceKey, traceId)
+		requestId := middleware.GetReqID(ctx)
+		if requestId == "" {
+			requestId = uuid.New().String()
+		}
+
+		ctx = metadata.AppendToOutgoingContext(ctx, RequestId, requestId, TraceId, traceId)
 
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}

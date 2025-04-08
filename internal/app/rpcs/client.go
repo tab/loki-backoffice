@@ -59,9 +59,9 @@ func NewClient(
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		grpc.WithKeepaliveParams(options),
 		grpc.WithChainUnaryInterceptor(
-			logInterceptor.Log(),
-			traceInterceptor.Trace(),
 			authInterceptor.Authenticate(),
+			traceInterceptor.Trace(),
+			logInterceptor.Log(),
 		),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)

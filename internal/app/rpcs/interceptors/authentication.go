@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	"loki-backoffice/internal/config/middlewares"
 	"loki-backoffice/internal/config/logger"
+	"loki-backoffice/internal/config/middlewares"
 )
 
 const (
