@@ -20,6 +20,7 @@ certs/*.pem
 certs/*.crt
 certs/*.key
 certs/*.csr
+certs/
 
 # Dependency directories (remove the comment below to include it)
 vendor/
