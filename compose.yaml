@@ -9,14 +9,16 @@ services:
     environment:
       - APP_NAME=loki-backoffice
       - APP_ADDRESS=0.0.0.0:8081
+      - GRPC_ADDRESS=backend:50051
       - CLIENT_URL=http://localhost:3001
+      - CERT_PATH=/run/certs
       - DATABASE_DSN=postgres://postgres:postgres@database:5432/loki-backoffice-development?sslmode=disable
       - TELEMETRY_URI=telemetry:4317
       - LOG_LEVEL=info
-    networks:
-      - loki-network
     volumes:
       - ./certs:/run/certs
+    networks:
+      - loki-network
 
 networks:
   loki-network:
