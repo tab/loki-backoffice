@@ -1095,30 +1095,23 @@ components:
     UserRequest:
       type: object
       properties:
+        identity_number:
+          type: string
+          description: "User's identity number"
+        personal_code:
+          type: string
+          description: "User's personal code"
         first_name:
           type: string
           description: "User's first name"
         last_name:
           type: string
           description: "User's last name"
-        email:
-          type: string
-          format: email
-          description: "User's email address"
-        password:
-          type: string
-          format: password
-          description: "User's password"
-        role_id:
-          type: string
-          format: uuid
-          description: "Role ID to assign to the user"
       required:
+        - identity_number
+        - personal_code
         - first_name
         - last_name
-        - email
-        - password
-        - role_id
 
     SessionSerializer:
       type: object
