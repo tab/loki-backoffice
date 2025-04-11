@@ -40,6 +40,7 @@ func Test_LoadConfig(t *testing.T) {
 			expected: &Config{
 				AppEnv:      "test",
 				AppAddr:     "0.0.0.0:8081",
+				GrpcAddr:    "0.0.0.0:50051",
 				ClientURL:   "http://localhost:3001",
 				CertPath:    certDir,
 				DatabaseDSN: "postgres://postgres:postgres@localhost:5432/loki-backoffice-test?sslmode=disable",
@@ -59,6 +60,7 @@ func Test_LoadConfig(t *testing.T) {
 
 			assert.Equal(t, tt.expected.AppEnv, result.AppEnv)
 			assert.Equal(t, tt.expected.AppAddr, result.AppAddr)
+			assert.Equal(t, tt.expected.GrpcAddr, result.GrpcAddr)
 			assert.Equal(t, tt.expected.ClientURL, result.ClientURL)
 			assert.Equal(t, tt.expected.CertPath, result.CertPath)
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
