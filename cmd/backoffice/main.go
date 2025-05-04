@@ -8,6 +8,7 @@ import (
 
 	"loki-backoffice/internal/app"
 	"loki-backoffice/internal/config"
+	"loki-backoffice/internal/config/logger"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 
 	fx.New(
 		fx.WithLogger(
-			func() fxevent.Logger {
+			func(log *logger.Logger) fxevent.Logger {
 				if cfg.LogLevel == config.DebugLevel {
 					return &fxevent.ConsoleLogger{W: os.Stdout}
 				}

@@ -18,6 +18,7 @@ type Config struct {
 	AppEnv       string
 	AppName      string
 	AppAddr      string
+	GrpcAddr     string
 	ClientURL    string
 	CertPath     string
 	DatabaseDSN  string
@@ -41,6 +42,7 @@ func LoadConfig() *Config {
 	}
 
 	flagAppAddr := flag.String("b", AppAddr, "server address")
+	flagGrpcAddr := flag.String("g", "", "gRPC server address")
 	flagClientURL := flag.String("c", ClientURL, "client address")
 	flagCertPath := flag.String("p", "", "certificate path")
 	flagDatabaseDSN := flag.String("d", "", "database DSN")
@@ -51,6 +53,7 @@ func LoadConfig() *Config {
 		AppEnv:    env,
 		AppName:   getEnvString("APP_NAME"),
 		AppAddr:   getFlagOrEnvString(*flagAppAddr, "APP_ADDRESS", AppAddr),
+		GrpcAddr:  getFlagOrEnvString(*flagGrpcAddr, "GRPC_ADDRESS", ""),
 		ClientURL: getFlagOrEnvString(*flagClientURL, "CLIENT_URL", ClientURL),
 
 		CertPath: getFlagOrEnvString(*flagCertPath, "CERT_PATH", ""),

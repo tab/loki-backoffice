@@ -24,17 +24,58 @@ func Test_NewServer(t *testing.T) {
 		AppAddr: "localhost:8080",
 	}
 
+	mockAuthenticationMiddleware := middlewares.NewMockAuthenticationMiddleware(ctrl)
+	mockAuthorizationMiddleware := middlewares.NewMockAuthorizationMiddleware(ctrl)
 	mockTelemetryMiddleware := middlewares.NewMockTelemetryMiddleware(ctrl)
-	mockHealthController := controllers.NewMockHealthController(ctrl)
+	mockLoggerMiddleware := middlewares.NewMockLoggerMiddleware(ctrl)
 
+	mockHealthController := controllers.NewMockHealthController(ctrl)
+	mockPermissionsController := controllers.NewMockPermissionsController(ctrl)
+	mockRolesController := controllers.NewMockRolesController(ctrl)
+	mockScopesController := controllers.NewMockScopesController(ctrl)
+	mockTokensController := controllers.NewMockTokensController(ctrl)
+	mockUsersController := controllers.NewMockUsersController(ctrl)
+
+	mockAuthenticationMiddleware.EXPECT().
+		Authenticate(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(next http.Handler) http.Handler {
+			return next
+		})
+	mockAuthorizationMiddleware.EXPECT().
+		Check(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(permission string) func(http.Handler) http.Handler {
+			return func(next http.Handler) http.Handler {
+				return next
+			}
+		})
 	mockTelemetryMiddleware.EXPECT().
 		Trace(gomock.Any()).
 		AnyTimes().
 		DoAndReturn(func(next http.Handler) http.Handler {
 			return next
 		})
+	mockLoggerMiddleware.EXPECT().
+		Log(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(next http.Handler) http.Handler {
+			return next
+		})
 
-	appRouter := router.NewRouter(cfg, mockTelemetryMiddleware, mockHealthController)
+	appRouter := router.NewRouter(
+		cfg,
+		mockAuthenticationMiddleware,
+		mockAuthorizationMiddleware,
+		mockTelemetryMiddleware,
+		mockLoggerMiddleware,
+		mockHealthController,
+		mockPermissionsController,
+		mockRolesController,
+		mockScopesController,
+		mockTokensController,
+		mockUsersController,
+	)
 
 	srv := NewServer(cfg, appRouter)
 	assert.NotNil(t, srv)

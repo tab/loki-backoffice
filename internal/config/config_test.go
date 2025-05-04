@@ -25,6 +25,8 @@ func TestMain(m *testing.M) {
 }
 
 func Test_LoadConfig(t *testing.T) {
+	certDir := spec.GenerateCertificates(t)
+
 	tests := []struct {
 		name     string
 		args     []string
@@ -38,8 +40,9 @@ func Test_LoadConfig(t *testing.T) {
 			expected: &Config{
 				AppEnv:      "test",
 				AppAddr:     "0.0.0.0:8081",
+				GrpcAddr:    "0.0.0.0:50051",
 				ClientURL:   "http://localhost:3001",
-				CertPath:    "./certs",
+				CertPath:    certDir,
 				DatabaseDSN: "postgres://postgres:postgres@localhost:5432/loki-backoffice-test?sslmode=disable",
 			},
 		},
@@ -50,12 +53,14 @@ func Test_LoadConfig(t *testing.T) {
 			for key, value := range tt.env {
 				os.Setenv(key, value)
 			}
+			os.Setenv("CERT_PATH", certDir)
 
 			flag.CommandLine = flag.NewFlagSet(tt.name, flag.ContinueOnError)
 			result := LoadConfig()
 
 			assert.Equal(t, tt.expected.AppEnv, result.AppEnv)
 			assert.Equal(t, tt.expected.AppAddr, result.AppAddr)
+			assert.Equal(t, tt.expected.GrpcAddr, result.GrpcAddr)
 			assert.Equal(t, tt.expected.ClientURL, result.ClientURL)
 			assert.Equal(t, tt.expected.CertPath, result.CertPath)
 			assert.Equal(t, tt.expected.DatabaseDSN, result.DatabaseDSN)
@@ -64,6 +69,7 @@ func Test_LoadConfig(t *testing.T) {
 				for key := range tt.env {
 					os.Unsetenv(key)
 				}
+				os.Unsetenv("CERT_PATH")
 			})
 		})
 	}
