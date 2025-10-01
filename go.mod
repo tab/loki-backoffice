@@ -22,7 +22,7 @@ require (
 	go.uber.org/fx v1.23.0
 	go.uber.org/mock v0.5.0
 	google.golang.org/grpc v1.71.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.9
 )
 
 require (
