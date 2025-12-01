@@ -51,7 +51,7 @@ jobs:
           mkdir -p $GITHUB_WORKSPACE/tmp
 
       - name: Checkout loki repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: tab/loki
           path: loki
@@ -59,7 +59,7 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Checkout loki-backoffice repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: loki-backoffice
 
